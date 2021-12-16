@@ -123,8 +123,8 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 
-var pdfjsVersion = '2.1.266';
-var pdfjsBuild = '81f5835c';
+var pdfjsVersion = '2.1.267';
+var pdfjsBuild = '072db7814';
 
 var pdfjsCoreWorker = __w_pdfjs_require__(1);
 
@@ -382,7 +382,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.1.266';
+    var workerVersion = '2.1.267';
 
     if (apiVersion !== workerVersion) {
       throw new Error("The API version \"".concat(apiVersion, "\" does not match ") + "the Worker version \"".concat(workerVersion, "\"."));
@@ -1842,6 +1842,7 @@ var UNSUPPORTED_FEATURES = {
   unknown: 'unknown',
   forms: 'forms',
   javaScript: 'javaScript',
+  signatures: "signatures",
   smask: 'smask',
   shadingPattern: 'shadingPattern',
   font: 'font'
@@ -28212,6 +28213,10 @@ function () {
 
             case 'Ch':
               return new ChoiceWidgetAnnotation(parameters);
+              s;
+
+            case "Sig":
+              return new SignatureWidgetAnnotation(parameters);
           }
 
           (0, _util.warn)('Unimplemented widget field type "' + fieldType + '", ' + 'falling back to base field type.');
@@ -28680,13 +28685,6 @@ function (_Annotation) {
     }
 
     data.readOnly = _this2.hasFieldFlag(_util.AnnotationFieldFlag.READONLY);
-
-    if (data.fieldType === 'Sig') {
-      data.fieldValue = null;
-
-      _this2.setFlags(_util.AnnotationFlag.HIDDEN);
-    }
-
     return _this2;
   }
 
@@ -28732,7 +28730,7 @@ function (_Annotation) {
   }, {
     key: "getOperatorList",
     value: function getOperatorList(evaluator, task, renderForms) {
-      if (renderForms) {
+      if (renderForms && !(this instanceof SignatureWidgetAnnotation)) {
         return Promise.resolve(new _operator_list.OperatorList());
       }
 
@@ -28961,31 +28959,60 @@ function (_WidgetAnnotation3) {
   return ChoiceWidgetAnnotation;
 }(WidgetAnnotation);
 
+var SignatureWidgetAnnotation =
+/*#__PURE__*/
+function (_WidgetAnnotation4) {
+  _inherits(SignatureWidgetAnnotation, _WidgetAnnotation4);
+
+  function SignatureWidgetAnnotation(params) {
+    var _this6;
+
+    _classCallCheck(this, SignatureWidgetAnnotation);
+
+    _this6 = _possibleConstructorReturn(this, _getPrototypeOf(SignatureWidgetAnnotation).call(this, params));
+    _this6.data.fieldValue = null;
+    return _this6;
+  }
+
+  _createClass(SignatureWidgetAnnotation, [{
+    key: "getFieldObject",
+    value: function getFieldObject() {
+      return {
+        id: this.data.id,
+        value: null,
+        type: "signature"
+      };
+    }
+  }]);
+
+  return SignatureWidgetAnnotation;
+}(WidgetAnnotation);
+
 var TextAnnotation =
 /*#__PURE__*/
 function (_Annotation2) {
   _inherits(TextAnnotation, _Annotation2);
 
   function TextAnnotation(parameters) {
-    var _this6;
+    var _this7;
 
     _classCallCheck(this, TextAnnotation);
 
     var DEFAULT_ICON_SIZE = 22;
-    _this6 = _possibleConstructorReturn(this, _getPrototypeOf(TextAnnotation).call(this, parameters));
-    _this6.data.annotationType = _util.AnnotationType.TEXT;
+    _this7 = _possibleConstructorReturn(this, _getPrototypeOf(TextAnnotation).call(this, parameters));
+    _this7.data.annotationType = _util.AnnotationType.TEXT;
 
-    if (_this6.data.hasAppearance) {
-      _this6.data.name = 'NoIcon';
+    if (_this7.data.hasAppearance) {
+      _this7.data.name = 'NoIcon';
     } else {
-      _this6.data.rect[1] = _this6.data.rect[3] - DEFAULT_ICON_SIZE;
-      _this6.data.rect[2] = _this6.data.rect[0] + DEFAULT_ICON_SIZE;
-      _this6.data.name = parameters.dict.has('Name') ? parameters.dict.get('Name').name : 'Note';
+      _this7.data.rect[1] = _this7.data.rect[3] - DEFAULT_ICON_SIZE;
+      _this7.data.rect[2] = _this7.data.rect[0] + DEFAULT_ICON_SIZE;
+      _this7.data.name = parameters.dict.has('Name') ? parameters.dict.get('Name').name : 'Note';
     }
 
-    _this6._preparePopup(parameters.dict);
+    _this7._preparePopup(parameters.dict);
 
-    return _this6;
+    return _this7;
   }
 
   return TextAnnotation;
@@ -28997,20 +29024,20 @@ function (_Annotation3) {
   _inherits(LinkAnnotation, _Annotation3);
 
   function LinkAnnotation(params) {
-    var _this7;
+    var _this8;
 
     _classCallCheck(this, LinkAnnotation);
 
-    _this7 = _possibleConstructorReturn(this, _getPrototypeOf(LinkAnnotation).call(this, params));
-    _this7.data.annotationType = _util.AnnotationType.LINK;
+    _this8 = _possibleConstructorReturn(this, _getPrototypeOf(LinkAnnotation).call(this, params));
+    _this8.data.annotationType = _util.AnnotationType.LINK;
 
     _obj.Catalog.parseDestDictionary({
       destDict: params.dict,
-      resultObj: _this7.data,
+      resultObj: _this8.data,
       docBaseUrl: params.pdfManager.docBaseUrl
     });
 
-    return _this7;
+    return _this8;
   }
 
   return LinkAnnotation;
@@ -29022,43 +29049,43 @@ function (_Annotation4) {
   _inherits(PopupAnnotation, _Annotation4);
 
   function PopupAnnotation(parameters) {
-    var _this8;
+    var _this9;
 
     _classCallCheck(this, PopupAnnotation);
 
-    _this8 = _possibleConstructorReturn(this, _getPrototypeOf(PopupAnnotation).call(this, parameters));
-    _this8.data.annotationType = _util.AnnotationType.POPUP;
+    _this9 = _possibleConstructorReturn(this, _getPrototypeOf(PopupAnnotation).call(this, parameters));
+    _this9.data.annotationType = _util.AnnotationType.POPUP;
     var dict = parameters.dict;
     var parentItem = dict.get('Parent');
 
     if (!parentItem) {
       (0, _util.warn)('Popup annotation has a missing or invalid parent annotation.');
-      return _possibleConstructorReturn(_this8);
+      return _possibleConstructorReturn(_this9);
     }
 
     var parentSubtype = parentItem.get('Subtype');
-    _this8.data.parentType = (0, _primitives.isName)(parentSubtype) ? parentSubtype.name : null;
-    _this8.data.parentId = dict.getRaw('Parent').toString();
-    _this8.data.title = (0, _util.stringToPDFString)(parentItem.get('T') || '');
-    _this8.data.contents = (0, _util.stringToPDFString)(parentItem.get('Contents') || '');
+    _this9.data.parentType = (0, _primitives.isName)(parentSubtype) ? parentSubtype.name : null;
+    _this9.data.parentId = dict.getRaw('Parent').toString();
+    _this9.data.title = (0, _util.stringToPDFString)(parentItem.get('T') || '');
+    _this9.data.contents = (0, _util.stringToPDFString)(parentItem.get('Contents') || '');
 
     if (!parentItem.has('C')) {
-      _this8.data.color = null;
+      _this9.data.color = null;
     } else {
-      _this8.setColor(parentItem.getArray('C'));
+      _this9.setColor(parentItem.getArray('C'));
 
-      _this8.data.color = _this8.color;
+      _this9.data.color = _this9.color;
     }
 
-    if (!_this8.viewable) {
+    if (!_this9.viewable) {
       var parentFlags = parentItem.get('F');
 
-      if (_this8._isViewable(parentFlags)) {
-        _this8.setFlags(parentFlags);
+      if (_this9._isViewable(parentFlags)) {
+        _this9.setFlags(parentFlags);
       }
     }
 
-    return _this8;
+    return _this9;
   }
 
   return PopupAnnotation;
@@ -29070,18 +29097,18 @@ function (_Annotation5) {
   _inherits(LineAnnotation, _Annotation5);
 
   function LineAnnotation(parameters) {
-    var _this9;
+    var _this10;
 
     _classCallCheck(this, LineAnnotation);
 
-    _this9 = _possibleConstructorReturn(this, _getPrototypeOf(LineAnnotation).call(this, parameters));
-    _this9.data.annotationType = _util.AnnotationType.LINE;
+    _this10 = _possibleConstructorReturn(this, _getPrototypeOf(LineAnnotation).call(this, parameters));
+    _this10.data.annotationType = _util.AnnotationType.LINE;
     var dict = parameters.dict;
-    _this9.data.lineCoordinates = _util.Util.normalizeRect(dict.getArray('L'));
+    _this10.data.lineCoordinates = _util.Util.normalizeRect(dict.getArray('L'));
 
-    _this9._preparePopup(dict);
+    _this10._preparePopup(dict);
 
-    return _this9;
+    return _this10;
   }
 
   return LineAnnotation;
@@ -29093,16 +29120,16 @@ function (_Annotation6) {
   _inherits(SquareAnnotation, _Annotation6);
 
   function SquareAnnotation(parameters) {
-    var _this10;
+    var _this11;
 
     _classCallCheck(this, SquareAnnotation);
 
-    _this10 = _possibleConstructorReturn(this, _getPrototypeOf(SquareAnnotation).call(this, parameters));
-    _this10.data.annotationType = _util.AnnotationType.SQUARE;
+    _this11 = _possibleConstructorReturn(this, _getPrototypeOf(SquareAnnotation).call(this, parameters));
+    _this11.data.annotationType = _util.AnnotationType.SQUARE;
 
-    _this10._preparePopup(parameters.dict);
+    _this11._preparePopup(parameters.dict);
 
-    return _this10;
+    return _this11;
   }
 
   return SquareAnnotation;
@@ -29114,16 +29141,16 @@ function (_Annotation7) {
   _inherits(CircleAnnotation, _Annotation7);
 
   function CircleAnnotation(parameters) {
-    var _this11;
+    var _this12;
 
     _classCallCheck(this, CircleAnnotation);
 
-    _this11 = _possibleConstructorReturn(this, _getPrototypeOf(CircleAnnotation).call(this, parameters));
-    _this11.data.annotationType = _util.AnnotationType.CIRCLE;
+    _this12 = _possibleConstructorReturn(this, _getPrototypeOf(CircleAnnotation).call(this, parameters));
+    _this12.data.annotationType = _util.AnnotationType.CIRCLE;
 
-    _this11._preparePopup(parameters.dict);
+    _this12._preparePopup(parameters.dict);
 
-    return _this11;
+    return _this12;
   }
 
   return CircleAnnotation;
@@ -29135,26 +29162,26 @@ function (_Annotation8) {
   _inherits(PolylineAnnotation, _Annotation8);
 
   function PolylineAnnotation(parameters) {
-    var _this12;
+    var _this13;
 
     _classCallCheck(this, PolylineAnnotation);
 
-    _this12 = _possibleConstructorReturn(this, _getPrototypeOf(PolylineAnnotation).call(this, parameters));
-    _this12.data.annotationType = _util.AnnotationType.POLYLINE;
+    _this13 = _possibleConstructorReturn(this, _getPrototypeOf(PolylineAnnotation).call(this, parameters));
+    _this13.data.annotationType = _util.AnnotationType.POLYLINE;
     var dict = parameters.dict;
     var rawVertices = dict.getArray('Vertices');
-    _this12.data.vertices = [];
+    _this13.data.vertices = [];
 
     for (var i = 0, ii = rawVertices.length; i < ii; i += 2) {
-      _this12.data.vertices.push({
+      _this13.data.vertices.push({
         x: rawVertices[i],
         y: rawVertices[i + 1]
       });
     }
 
-    _this12._preparePopup(dict);
+    _this13._preparePopup(dict);
 
-    return _this12;
+    return _this13;
   }
 
   return PolylineAnnotation;
@@ -29166,13 +29193,13 @@ function (_PolylineAnnotation) {
   _inherits(PolygonAnnotation, _PolylineAnnotation);
 
   function PolygonAnnotation(parameters) {
-    var _this13;
+    var _this14;
 
     _classCallCheck(this, PolygonAnnotation);
 
-    _this13 = _possibleConstructorReturn(this, _getPrototypeOf(PolygonAnnotation).call(this, parameters));
-    _this13.data.annotationType = _util.AnnotationType.POLYGON;
-    return _this13;
+    _this14 = _possibleConstructorReturn(this, _getPrototypeOf(PolygonAnnotation).call(this, parameters));
+    _this14.data.annotationType = _util.AnnotationType.POLYGON;
+    return _this14;
   }
 
   return PolygonAnnotation;
@@ -29184,31 +29211,31 @@ function (_Annotation9) {
   _inherits(InkAnnotation, _Annotation9);
 
   function InkAnnotation(parameters) {
-    var _this14;
+    var _this15;
 
     _classCallCheck(this, InkAnnotation);
 
-    _this14 = _possibleConstructorReturn(this, _getPrototypeOf(InkAnnotation).call(this, parameters));
-    _this14.data.annotationType = _util.AnnotationType.INK;
+    _this15 = _possibleConstructorReturn(this, _getPrototypeOf(InkAnnotation).call(this, parameters));
+    _this15.data.annotationType = _util.AnnotationType.INK;
     var dict = parameters.dict;
     var xref = parameters.xref;
     var originalInkLists = dict.getArray('InkList');
-    _this14.data.inkLists = [];
+    _this15.data.inkLists = [];
 
     for (var i = 0, ii = originalInkLists.length; i < ii; ++i) {
-      _this14.data.inkLists.push([]);
+      _this15.data.inkLists.push([]);
 
       for (var j = 0, jj = originalInkLists[i].length; j < jj; j += 2) {
-        _this14.data.inkLists[i].push({
+        _this15.data.inkLists[i].push({
           x: xref.fetchIfRef(originalInkLists[i][j]),
           y: xref.fetchIfRef(originalInkLists[i][j + 1])
         });
       }
     }
 
-    _this14._preparePopup(dict);
+    _this15._preparePopup(dict);
 
-    return _this14;
+    return _this15;
   }
 
   return InkAnnotation;
@@ -29220,16 +29247,16 @@ function (_Annotation10) {
   _inherits(HighlightAnnotation, _Annotation10);
 
   function HighlightAnnotation(parameters) {
-    var _this15;
+    var _this16;
 
     _classCallCheck(this, HighlightAnnotation);
 
-    _this15 = _possibleConstructorReturn(this, _getPrototypeOf(HighlightAnnotation).call(this, parameters));
-    _this15.data.annotationType = _util.AnnotationType.HIGHLIGHT;
+    _this16 = _possibleConstructorReturn(this, _getPrototypeOf(HighlightAnnotation).call(this, parameters));
+    _this16.data.annotationType = _util.AnnotationType.HIGHLIGHT;
 
-    _this15._preparePopup(parameters.dict);
+    _this16._preparePopup(parameters.dict);
 
-    return _this15;
+    return _this16;
   }
 
   return HighlightAnnotation;
@@ -29241,16 +29268,16 @@ function (_Annotation11) {
   _inherits(UnderlineAnnotation, _Annotation11);
 
   function UnderlineAnnotation(parameters) {
-    var _this16;
+    var _this17;
 
     _classCallCheck(this, UnderlineAnnotation);
 
-    _this16 = _possibleConstructorReturn(this, _getPrototypeOf(UnderlineAnnotation).call(this, parameters));
-    _this16.data.annotationType = _util.AnnotationType.UNDERLINE;
+    _this17 = _possibleConstructorReturn(this, _getPrototypeOf(UnderlineAnnotation).call(this, parameters));
+    _this17.data.annotationType = _util.AnnotationType.UNDERLINE;
 
-    _this16._preparePopup(parameters.dict);
+    _this17._preparePopup(parameters.dict);
 
-    return _this16;
+    return _this17;
   }
 
   return UnderlineAnnotation;
@@ -29262,16 +29289,16 @@ function (_Annotation12) {
   _inherits(SquigglyAnnotation, _Annotation12);
 
   function SquigglyAnnotation(parameters) {
-    var _this17;
+    var _this18;
 
     _classCallCheck(this, SquigglyAnnotation);
 
-    _this17 = _possibleConstructorReturn(this, _getPrototypeOf(SquigglyAnnotation).call(this, parameters));
-    _this17.data.annotationType = _util.AnnotationType.SQUIGGLY;
+    _this18 = _possibleConstructorReturn(this, _getPrototypeOf(SquigglyAnnotation).call(this, parameters));
+    _this18.data.annotationType = _util.AnnotationType.SQUIGGLY;
 
-    _this17._preparePopup(parameters.dict);
+    _this18._preparePopup(parameters.dict);
 
-    return _this17;
+    return _this18;
   }
 
   return SquigglyAnnotation;
@@ -29283,16 +29310,16 @@ function (_Annotation13) {
   _inherits(StrikeOutAnnotation, _Annotation13);
 
   function StrikeOutAnnotation(parameters) {
-    var _this18;
+    var _this19;
 
     _classCallCheck(this, StrikeOutAnnotation);
 
-    _this18 = _possibleConstructorReturn(this, _getPrototypeOf(StrikeOutAnnotation).call(this, parameters));
-    _this18.data.annotationType = _util.AnnotationType.STRIKEOUT;
+    _this19 = _possibleConstructorReturn(this, _getPrototypeOf(StrikeOutAnnotation).call(this, parameters));
+    _this19.data.annotationType = _util.AnnotationType.STRIKEOUT;
 
-    _this18._preparePopup(parameters.dict);
+    _this19._preparePopup(parameters.dict);
 
-    return _this18;
+    return _this19;
   }
 
   return StrikeOutAnnotation;
@@ -29304,16 +29331,16 @@ function (_Annotation14) {
   _inherits(StampAnnotation, _Annotation14);
 
   function StampAnnotation(parameters) {
-    var _this19;
+    var _this20;
 
     _classCallCheck(this, StampAnnotation);
 
-    _this19 = _possibleConstructorReturn(this, _getPrototypeOf(StampAnnotation).call(this, parameters));
-    _this19.data.annotationType = _util.AnnotationType.STAMP;
+    _this20 = _possibleConstructorReturn(this, _getPrototypeOf(StampAnnotation).call(this, parameters));
+    _this20.data.annotationType = _util.AnnotationType.STAMP;
 
-    _this19._preparePopup(parameters.dict);
+    _this20._preparePopup(parameters.dict);
 
-    return _this19;
+    return _this20;
   }
 
   return StampAnnotation;
@@ -29325,18 +29352,18 @@ function (_Annotation15) {
   _inherits(FileAttachmentAnnotation, _Annotation15);
 
   function FileAttachmentAnnotation(parameters) {
-    var _this20;
+    var _this21;
 
     _classCallCheck(this, FileAttachmentAnnotation);
 
-    _this20 = _possibleConstructorReturn(this, _getPrototypeOf(FileAttachmentAnnotation).call(this, parameters));
+    _this21 = _possibleConstructorReturn(this, _getPrototypeOf(FileAttachmentAnnotation).call(this, parameters));
     var file = new _obj.FileSpec(parameters.dict.get('FS'), parameters.xref);
-    _this20.data.annotationType = _util.AnnotationType.FILEATTACHMENT;
-    _this20.data.file = file.serializable;
+    _this21.data.annotationType = _util.AnnotationType.FILEATTACHMENT;
+    _this21.data.file = file.serializable;
 
-    _this20._preparePopup(parameters.dict);
+    _this21._preparePopup(parameters.dict);
 
-    return _this20;
+    return _this21;
   }
 
   return FileAttachmentAnnotation;
